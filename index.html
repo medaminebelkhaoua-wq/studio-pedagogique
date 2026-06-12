@@ -43,6 +43,7 @@ input:focus{border-color:#534AB7}
 .niveau-btn{padding:6px 14px;border:1px solid #ddd;border-radius:20px;background:#fff;cursor:pointer;font-size:13px}
 .niveau-btn.selected{background:#534AB7;color:#fff;border-color:#534AB7}
 .hidden{display:none}
+.error-msg{color:#791F1F;background:#FCEBEB;border-radius:8px;padding:10px;font-size:13px;margin-top:8px}
 </style>
 </head>
 <body>
@@ -63,6 +64,7 @@ input:focus{border-color:#534AB7}
         </div>
       </div>
       <button class="btn btn-primary btn-full" onclick="analyserSujet()">✨ Trouver les personnages</button>
+      <div id="erreur1" class="error-msg hidden"></div>
     </div>
   </div>
 
@@ -71,6 +73,7 @@ input:focus{border-color:#534AB7}
     <div class="card-body">
       <div id="personaGrid" class="persona-grid"></div>
       <button class="btn btn-primary btn-full" onclick="lancerProduction()">🎬 Générer la vidéo</button>
+      <div id="erreur2" class="error-msg hidden"></div>
     </div>
   </div>
 
@@ -98,5 +101,137 @@ input:focus{border-color:#534AB7}
 
 </div>
 <script>
-const API = 'https://meta-tuteur.med-amine-belkhaoua.workers.dev';
-var niveau='CM2',
+var API='https://meta-tuteur.med-amine-belkhaoua.workers.dev';
+var niveau='CM2', selectedPersona=null, personasData=[], sujet='';
+
+function showErr(id, msg){
+  var el=document.getElementById(id);
+  el.textContent=msg;
+  el.classList.remove('hidden');
+  setTimeout(function(){el.classList.add('hidden')},6000);
+}
+
+function selectNiveau(b,v){
+  document.querySelectorAll('.niveau-btn').forEach(function(x){x.classList.remove('selected')});
+  b.classList.add('selected');
+  niveau=v;
+}
+
+async function analyserSujet(){
+  sujet=document.getElementById('sujetInput').value.trim();
+  if(!sujet){showErr('erreur1','Entre un sujet !');return;}
+  document.getElementById('personasSection').classList.remove('hidden');
+  document.getElementById('personaGrid').innerHTML='<div style="grid-column:1/-1;padding:12px;color:#666;font-size:13px">🔍 Recherche des personnages...</div>';
+
+  try{
+    var r=await fetch(API+'/api/claude',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        prompt:'Pour le sujet "'+sujet+'" niveau '+niveau+', propose 4 personnages historiques ou scientifiques parfaits pour expliquer ce concept. Reponds UNIQUEMENT en JSON valide, sans markdown, sans backticks, sans explication. Format exact: {"personnages":[{"emoji":"...","nom":"...","titre":"...","accroche":"..."},{"emoji":"...","nom":"...","titre":"...","accroche":"..."},{"emoji":"...","nom":"...","titre":"...","accroche":"..."},{"emoji":"...","nom":"...","titre":"...","accroche":"..."}]}'
+      })
+    });
+    if(!r.ok) throw new Error('Erreur serveur: '+r.status);
+    var data=await r.json();
+    if(!data.text) throw new Error('Pas de réponse du serveur');
+    var clean=data.text.trim().replace(/^```json/,'').replace(/^```/,'').replace(/```$/,'').trim();
+    var parsed=JSON.parse(clean);
+    if(!parsed.personnages) throw new Error('Format invalide');
+    personasData=parsed.personnages;
+    renderPersonas();
+  }catch(e){
+    document.getElementById('personaGrid').innerHTML='';
+    showErr('erreur1','Erreur: '+e.message);
+    document.getElementById('personasSection').classList.add('hidden');
+  }
+}
+
+function renderPersonas(){
+  var grid=document.getElementById('personaGrid');
+  grid.innerHTML='';
+  personasData.forEach(function(p,i){
+    var c=document.createElement('div');
+    c.className='persona-card';
+    c.innerHTML='<div class="persona-emoji">'+p.emoji+'</div><div class="persona-name">'+p.nom+'</div><div class="persona-role">'+p.titre+'</div><div class="persona-quote">"'+p.accroche+'"</div>';
+    c.onclick=function(){
+      document.querySelectorAll('.persona-card').forEach(function(x){x.classList.remove('selected')});
+      c.classList.add('selected');
+      selectedPersona=personasData[i];
+    };
+    grid.appendChild(c);
+  });
+}
+
+function setStep(n,status){
+  for(var i=1;i<=4;i++){
+    document.getElementById('step'+i).className='step-row'+(i<n?' done':i===n?' active':'');
+    document.getElementById('s'+i+'status').textContent=i<n?'✅ Fait':i===n?status:'En attente';
+  }
+}
+
+function setStatus(msg,type){
+  document.getElementById('statusMsg').className='status-box status-'+(type||'loading');
+  document.getElementById('statusText').textContent=msg;
+}
+
+async function lancerProduction(){
+  if(!selectedPersona){showErr('erreur2','Choisis un personnage !');return;}
+  document.getElementById('productionSection').classList.remove('hidden');
+  document.getElementById('resultSection').classList.add('hidden');
+  document.getElementById('productionSection').scrollIntoView({behavior:'smooth'});
+
+  try{
+    setStep(1,'En cours...'); setStatus('Génération du script...');
+    var r1=await fetch(API+'/api/claude',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt:'Tu es '+selectedPersona.nom+'. Ecris un script video de 45 secondes pour expliquer "'+sujet+'" a des parents d eleves de '+niveau+'. Parle a la premiere personne, commence par une accroche forte, utilise une metaphore du quotidien, termine par un appel a l action. Maximum 120 mots. Reponds uniquement avec le texte du script, rien d autre.'})
+    });
+    var d1=await r1.json();
+    var script=d1.text;
+    setStep(1,'Fait');
+
+    setStep(2,'En cours...'); setStatus('Création du portrait IA...');
+    var r2=await fetch(API+'/api/image',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({prompt:'Realistic portrait of '+selectedPersona.nom+', historical painting style, cinematic lighting, neutral background, expressive face, high quality, 8k, professional photography'})
+    });
+    var d2=await r2.json();
+    if(d2.error) throw new Error('Image: '+d2.error);
+    var imageUrl=d2.url;
+    setStep(2,'Fait');
+
+    setStep(3,'En cours...'); setStatus("Animation de l'avatar (1-2 minutes)...");
+    var r3=await fetch(API+'/api/video',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({script:script,imageUrl:imageUrl})
+    });
+    var d3=await r3.json();
+    if(d3.error) throw new Error('Vidéo: '+d3.error);
+    var videoUrl=d3.url;
+    setStep(3,'Fait');
+
+    setStep(4,'✅ Prête !'); setStatus('Vidéo générée avec succès !','success');
+    document.getElementById('videoPlayer').src=videoUrl;
+    document.getElementById('downloadBtn').href=videoUrl;
+    document.getElementById('resultSection').classList.remove('hidden');
+    document.getElementById('resultSection').scrollIntoView({behavior:'smooth'});
+
+  }catch(e){
+    setStatus('Erreur : '+e.message,'error');
+  }
+}
+
+function reset(){
+  document.getElementById('sujetInput').value='';
+  ['personasSection','productionSection','resultSection'].forEach(function(id){
+    document.getElementById(id).classList.add('hidden');
+  });
+  selectedPersona=null;
+  window.scrollTo(0,0);
+}
+</script>
+</body>
+</html>
