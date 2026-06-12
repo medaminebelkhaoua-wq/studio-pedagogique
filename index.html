@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Studio Contenu Pédagogique</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif}
+body{background:#f5f5f5;display:flex;justify-content:center;padding:1rem}
+#app{width:100%;max-width:560px;display:flex;flex-direction:column;gap:14px}
+.card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden}
+.card-header{padding:12px 16px;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;gap:10px;background:#fafafa}
+.step-badge{width:24px;height:24px;border-radius:50%;background:#EEEDFE;color:#3C3489;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.card-header h3{font-size:14px;font-weight:600;color:#111}
+.card-body{padding:16px;display:flex;flex-direction:column;gap:12px}
+input{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;color:#111;background:#fff;outline:none}
+input:focus{border-color:#534AB7}
+.btn{padding:9px 18px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:#534AB7;color:#fff}
+.btn-primary:hover{background:#3C3489}
+.btn-secondary{background:#fff;color:#111;border:1px solid #ddd}
+.btn-full{width:100%;justify-content:center}
+.persona-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.persona-card{border:1px solid #e5e5e5;border-radius:10px;padding:12px;cursor:pointer;transition:all .15s}
+.persona-card:hover{border-color:#534AB7}
+.persona-card.selected{border:2px solid #534AB7;background:#EEEDFE}
+.persona-emoji{font-size:26px;margin-bottom:6px}
+.persona-name{font-size:13px;font-weight:600;color:#111;margin-bottom:2px}
+.persona-role{font-size:11px;color:#666;margin-bottom:6px}
+.persona-quote{font-size:11px;color:#534AB7;font-style:italic;line-height:1.4}
+.step-row{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #e5e5e5;border-radius:8px;font-size:13px}
+.step-row.active{border-color:#534AB7;background:#EEEDFE}
+.step-row.done{border-color:#3B6D11;background:#EAF3DE}
+.step-icon{font-size:18px;flex-shrink:0}
+.step-label{flex:1;font-weight:500;color:#111}
+.step-status{font-size:11px;color:#666}
+.status-box{padding:12px;border-radius:8px;font-size:13px;line-height:1.6;display:flex;align-items:flex-start;gap:10px}
+.status-loading{background:#EEEDFE;color:#3C3489}
+.status-success{background:#EAF3DE;color:#27500A}
+.status-error{background:#FCEBEB;color:#791F1F}
+.label{font-size:12px;color:#666;font-weight:500;margin-bottom:4px}
+.niveau-row{display:flex;gap:8px;flex-wrap:wrap}
+.niveau-btn{padding:6px 14px;border:1px solid #ddd;border-radius:20px;background:#fff;cursor:pointer;font-size:13px}
+.niveau-btn.selected{background:#534AB7;color:#fff;border-color:#534AB7}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div class="card">
+    <div class="card-header"><div class="step-badge">1</div><h3>Sujet du contenu</h3></div>
+    <div class="card-body">
+      <div><div class="label">Concept à expliquer</div>
+        <input type="text" id="sujetInput" placeholder="Ex: La Révolution française, les fractions...">
+      </div>
+      <div><div class="label">Niveau</div>
+        <div class="niveau-row">
+          <button class="niveau-btn selected" onclick="selectNiveau(this,'CM2')">CM2</button>
+          <button class="niveau-btn" onclick="selectNiveau(this,'CM1')">CM1</button>
+          <button class="niveau-btn" onclick="selectNiveau(this,'CE2')">CE2</button>
+          <button class="niveau-btn" onclick="selectNiveau(this,'College')">Collège</button>
+        </div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="analyserSujet()">✨ Trouver les personnages</button>
+    </div>
+  </div>
+
+  <div class="card hidden" id="personasSection">
+    <div class="card-header"><div class="step-badge">2</div><h3>Choisir le personnage</h3></div>
+    <div class="card-body">
+      <div id="personaGrid" class="persona-grid"></div>
+      <button class="btn btn-primary btn-full" onclick="lancerProduction()">🎬 Générer la vidéo</button>
+    </div>
+  </div>
+
+  <div class="card hidden" id="productionSection">
+    <div class="card-header"><div class="step-badge">3</div><h3>Production en cours...</h3></div>
+    <div class="card-body">
+      <div id="step1" class="step-row active"><span class="step-icon">✍️</span><span class="step-label">Génération du script</span><span class="step-status" id="s1status">En cours...</span></div>
+      <div id="step2" class="step-row"><span class="step-icon">🎨</span><span class="step-label">Création du portrait IA</span><span class="step-status" id="s2status">En attente</span></div>
+      <div id="step3" class="step-row"><span class="step-icon">🎤</span><span class="step-label">Animation de l'avatar</span><span class="step-status" id="s3status">En attente</span></div>
+      <div id="step4" class="step-row"><span class="step-icon">✅</span><span class="step-label">Vidéo prête</span><span class="step-status" id="s4status">En attente</span></div>
+      <div id="statusMsg" class="status-box status-loading"><span>⏳</span><span id="statusText">Démarrage...</span></div>
+    </div>
+  </div>
+
+  <div class="card hidden" id="resultSection">
+    <div class="card-header"><div class="step-badge">✓</div><h3>Vidéo prête !</h3></div>
+    <div style="text-align:center;padding:20px">
+      <video id="videoPlayer" controls style="width:100%;border-radius:10px;margin-bottom:12px"></video>
+      <br>
+      <a id="downloadBtn" class="btn btn-primary" download="video.mp4">⬇️ Télécharger</a>
+      <br><br>
+      <button class="btn btn-secondary" onclick="reset()">🔄 Nouvelle vidéo</button>
+    </div>
+  </div>
+
+</div>
+<script>
+const API = 'https://meta-tuteur.med-amine-belkhaoua.workers.dev';
+var niveau='CM2',
