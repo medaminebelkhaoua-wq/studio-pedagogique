@@ -18,6 +18,7 @@ input:focus{border-color:#534AB7}
 .btn{padding:9px 18px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:6px}
 .btn-primary{background:#534AB7;color:#fff}
 .btn-primary:hover{background:#3C3489}
+.btn-primary:disabled{opacity:.55;cursor:not-allowed}
 .btn-secondary{background:#fff;color:#111;border:1px solid #ddd}
 .btn-full{width:100%;justify-content:center}
 .persona-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -52,7 +53,6 @@ input:focus{border-color:#534AB7}
 </head>
 <body>
 <div id="app">
-
   <div class="card">
     <div class="card-header"><div class="step-badge">1</div><h3>Sujet du contenu</h3></div>
     <div class="card-body">
@@ -73,7 +73,6 @@ input:focus{border-color:#534AB7}
       <div id="erreur1" class="error-msg hidden"></div>
     </div>
   </div>
-
   <div class="card hidden" id="personasSection">
     <div class="card-header"><div class="step-badge">2</div><h3>Choisir le personnage</h3></div>
     <div class="card-body">
@@ -82,7 +81,6 @@ input:focus{border-color:#534AB7}
       <div id="erreur2" class="error-msg hidden"></div>
     </div>
   </div>
-
   <div class="card hidden" id="productionSection">
     <div class="card-header"><div class="step-badge">3</div><h3>Production en cours...</h3></div>
     <div class="card-body">
@@ -98,7 +96,7 @@ input:focus{border-color:#534AB7}
       </div>
       <div id="step3" class="step-row">
         <span class="step-icon">🎙️</span>
-        <span class="step-label">Voix ElevenLabs + animation HeyGen</span>
+        <span class="step-label">Voix FR native + animation HeyGen</span>
         <span class="step-status" id="s3status">En attente</span>
       </div>
       <div id="step4" class="step-row">
@@ -111,7 +109,6 @@ input:focus{border-color:#534AB7}
       </div>
     </div>
   </div>
-
   <div class="card hidden" id="resultSection">
     <div class="card-header"><div class="step-badge">✓</div><h3>Video prete !</h3></div>
     <div style="text-align:center;padding:20px">
@@ -131,7 +128,6 @@ input:focus{border-color:#534AB7}
       <button class="btn btn-secondary" id="btnReset">Nouvelle video</button>
     </div>
   </div>
-
 </div>
 <script>
 var API = 'https://studio-api.metatuteur.workers.dev';
@@ -146,7 +142,6 @@ function showErr(id, msg) {
   el.classList.remove('hidden');
   setTimeout(function() { el.classList.add('hidden'); }, 7000);
 }
-
 function setStep(n, status) {
   for (var i = 1; i <= 4; i++) {
     document.getElementById('step' + i).className =
@@ -155,12 +150,15 @@ function setStep(n, status) {
       i < n ? '✅ Fait' : i === n ? status : 'En attente';
   }
 }
-
 function setStatus(msg, type) {
   document.getElementById('statusMsg').className = 'status-box status-' + (type || 'loading');
   document.getElementById('statusText').textContent = msg;
 }
-
+function escapeHtml(str) {
+  return String(str || '').replace(/[&<>"']/g, function(c) {
+    return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+  });
+}
 function renderPersonas() {
   var grid = document.getElementById('personaGrid');
   grid.innerHTML = '';
@@ -168,10 +166,10 @@ function renderPersonas() {
     var c = document.createElement('div');
     c.className = 'persona-card';
     c.innerHTML =
-      '<div class="persona-emoji">' + p.emoji + '</div>' +
-      '<div class="persona-name">' + p.nom + '</div>' +
-      '<div class="persona-role">' + p.titre + '</div>' +
-      '<div class="persona-quote">"' + p.accroche + '"</div>';
+      '<div class="persona-emoji">' + escapeHtml(p.emoji) + '</div>' +
+      '<div class="persona-name">' + escapeHtml(p.nom) + '</div>' +
+      '<div class="persona-role">' + escapeHtml(p.titre) + '</div>' +
+      '<div class="persona-quote">"' + escapeHtml(p.accroche) + '"</div>';
     c.addEventListener('click', function() {
       document.querySelectorAll('.persona-card').forEach(function(x) {
         x.classList.remove('selected');
@@ -183,6 +181,7 @@ function renderPersonas() {
   });
 }
 
+// ---- Étape 1 : trouver les personnages ----
 async function analyserSujet() {
   sujet = document.getElementById('sujetInput').value.trim();
   if (!sujet) { showErr('erreur1', 'Entre un sujet !'); return; }
@@ -211,115 +210,130 @@ async function analyserSujet() {
     renderPersonas();
   } catch(e) {
     document.getElementById('personaGrid').innerHTML = '';
-    showErr('erreur1', 'Erreur: ' + e.message);
-    document.getElementById('personasSection').classList.add('hidden');
-    console.error('analyserSujet:', e);
+    showErr('erreur2', 'Erreur: ' + e.message);
   }
 }
 
-async function lancerProduction() {
+// ---- Helper : appel POST JSON ----
+async function postJSON(path, payload) {
+  var r = await fetch(API + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  var data = await r.json().catch(function() { return {}; });
+  if (!r.ok || data.error) {
+    throw new Error(data.error || ('Serveur: ' + r.status));
+  }
+  return data;
+}
+
+// ---- Étape 3 : génération du script ----
+async function genererScript() {
+  setStep(1, 'En cours...');
+  setStatus('Rédaction du script par ' + selectedPersona.nom + '...');
+  var prompt =
+    'Tu es ' + selectedPersona.nom + ', ' + selectedPersona.titre + '. ' +
+    'Explique "' + sujet + '" pour un élève de niveau ' + niveau + ' ' +
+    'en parlant à la première personne, de façon vivante et mémorable. ' +
+    'Maximum 1400 caractères, sans titres ni markdown, juste le texte parlé.';
+  var data = await postJSON('/api/claude', { prompt: prompt });
+  return data.text.trim();
+}
+
+// ---- Génération du portrait ----
+async function genererImage() {
+  setStep(2, 'En cours...');
+  setStatus('Génération du portrait de ' + selectedPersona.nom + '...');
+  var prompt = 'Portrait of ' + selectedPersona.nom + ', ' + selectedPersona.titre +
+    ', historical accurate, looking at camera';
+  var data = await postJSON('/api/image', { prompt: prompt });
+  return data.url;
+}
+
+// ---- Lancement vidéo + polling ----
+async function genererVideo(script, imageUrl) {
+  setStep(3, 'En cours...');
+  setStatus('Lancement de la vidéo HeyGen...');
+  var start = await postJSON('/api/video', {
+    script: script,
+    imageUrl: imageUrl,
+    genre: selectedPersona.genre === 'femme' ? 'femme' : 'homme'
+  });
+
+  var jobId = start.job_id;
+  if (!jobId) throw new Error('job_id manquant');
+
+  // Polling toutes les 5s, max 5 minutes
+  for (var i = 0; i < 60; i++) {
+    await new Promise(function(res) { setTimeout(res, 5000); });
+    setStatus('Rendu en cours... (' + (i * 5) + 's)');
+
+    var r = await fetch(API + '/api/video/status?job_id=' + encodeURIComponent(jobId));
+    var poll = await r.json().catch(function() { return {}; });
+
+    if (poll.status === 'completed' && poll.url) {
+      return poll.url;
+    }
+    if (poll.status === 'failed') {
+      throw new Error(poll.error || 'Le rendu vidéo a échoué');
+    }
+  }
+  throw new Error('Délai dépassé : vidéo non disponible après 5 minutes');
+}
+
+// ---- Orchestration complète ----
+async function produire() {
   if (!selectedPersona) { showErr('erreur2', 'Choisis un personnage !'); return; }
+
   document.getElementById('personaNomStep').textContent = selectedPersona.nom;
   document.getElementById('productionSection').classList.remove('hidden');
-  document.getElementById('resultSection').classList.add('hidden');
-  document.getElementById('productionSection').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('btnProduire').disabled = true;
+
   try {
-    setStep(1, 'En cours...');
-    setStatus('✍️ ' + selectedPersona.nom + ' redige son script...');
-    var r1 = await fetch(API + '/api/claude', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        prompt:
-          'Tu es ' + selectedPersona.nom + ', ' + selectedPersona.titre + '. ' +
-          'Ecris un script video de 40 secondes TRES expressif pour expliquer "' + sujet + '" ' +
-          'a des eleves de ' + niveau + '. ' +
-          'Parle a la premiere personne avec ta personnalite historique, ' +
-          'commence par une accroche surprenante et anachronique ("De mon temps..."), ' +
-          'explique avec une metaphore simple et moderne, ' +
-          'sois charismatique et memorable, ' +
-          'termine par un encouragement. ' +
-          'Maximum 90 mots. Uniquement le texte du script, sans titre ni indication de mise en scene.'
-      })
-    });
-    if (!r1.ok) throw new Error('Script: serveur ' + r1.status);
-    var d1 = await r1.json();
-    if (d1.error) throw new Error('Script: ' + d1.error);
-    var script = d1.text.trim();
-    setStep(1, '✅ Fait');
+    var script = await genererScript();
+    var imageUrl = await genererImage();
+    var videoUrl = await genererVideo(script, imageUrl);
 
-    setStep(2, 'En cours...');
-    setStatus('🎨 Creation du portrait de ' + selectedPersona.nom + '...');
-    var r2 = await fetch(API + '/api/image', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        prompt:
-          'Hyper realistic portrait of ' + selectedPersona.nom + ', ' + selectedPersona.titre + ', ' +
-          'expressive face looking at camera, warm confident smile, ' +
-          'vibrant colors, cinematic lighting, detailed face, 8k, photorealistic, ' +
-          'dramatic background, Renaissance painting meets modern photography style, ' +
-          'face centered in frame, neutral background'
-      })
-    });
-    if (!r2.ok) throw new Error('Image: serveur ' + r2.status);
-    var d2 = await r2.json();
-    if (d2.error) throw new Error('Image: ' + d2.error);
-    var imageUrl = d2.url;
-    setStep(2, '✅ Fait');
+    setStep(5, '');
+    setStatus('Vidéo prête !', 'success');
 
-    setStep(3, 'En cours...');
-    setStatus('🎙️ Animation en cours avec voix ElevenLabs (1-2 minutes)...');
-    var r3 = await fetch(API + '/api/video', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        script: script,
-        imageUrl: imageUrl,
-        persona: selectedPersona.nom,
-        genre: selectedPersona.genre || 'homme'
-      })
-    });
-    if (!r3.ok) throw new Error('Video: serveur ' + r3.status);
-    var d3 = await r3.json();
-    if (d3.error) throw new Error('Video: ' + d3.error);
-    setStep(3, '✅ Fait');
-
-    setStep(4, '🎉 Prete !');
-    setStatus('🎉 Video generee avec succes !', 'success');
-    document.getElementById('videoPlayer').src = d3.url;
-    document.getElementById('downloadBtn').href = d3.url;
+    var player = document.getElementById('videoPlayer');
+    player.src = videoUrl;
+    document.getElementById('downloadBtn').href = videoUrl;
     document.getElementById('resultSection').classList.remove('hidden');
-    document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
-
+    document.getElementById('productionSection').classList.add('hidden');
   } catch(e) {
-    setStatus('❌ Erreur : ' + e.message, 'error');
-    console.error('lancerProduction:', e);
+    setStatus('Erreur: ' + e.message, 'error');
+  } finally {
+    document.getElementById('btnProduire').disabled = false;
   }
 }
 
-function resetApp() {
-  document.getElementById('sujetInput').value = '';
+// ---- Reset ----
+function reset() {
   selectedPersona = null;
   personasData = [];
-  ['personasSection', 'productionSection', 'resultSection'].forEach(function(id) {
-    document.getElementById(id).classList.add('hidden');
-  });
-  window.scrollTo(0, 0);
+  document.getElementById('sujetInput').value = '';
+  document.getElementById('personaGrid').innerHTML = '';
+  document.getElementById('personasSection').classList.add('hidden');
+  document.getElementById('productionSection').classList.add('hidden');
+  document.getElementById('resultSection').classList.add('hidden');
+  document.getElementById('videoPlayer').src = '';
+  setStep(1, 'En cours...');
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.niveau-btn').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      document.querySelectorAll('.niveau-btn').forEach(function(b) { b.classList.remove('selected'); });
-      btn.classList.add('selected');
-      niveau = btn.getAttribute('data-niveau');
-    });
+// ---- Événements ----
+document.querySelectorAll('.niveau-btn').forEach(function(b) {
+  b.addEventListener('click', function() {
+    document.querySelectorAll('.niveau-btn').forEach(function(x) { x.classList.remove('selected'); });
+    b.classList.add('selected');
+    niveau = b.dataset.niveau;
   });
-  document.getElementById('btnAnalyser').addEventListener('click', analyserSujet);
-  document.getElementById('btnProduire').addEventListener('click', lancerProduction);
-  document.getElementById('btnReset').addEventListener('click', resetApp);
 });
+document.getElementById('btnAnalyser').addEventListener('click', analyserSujet);
+document.getElementById('btnProduire').addEventListener('click', produire);
+document.getElementById('btnReset').addEventListener('click', reset);
 </script>
 </body>
 </html>
