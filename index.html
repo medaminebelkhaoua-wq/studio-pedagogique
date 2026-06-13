@@ -101,20 +101,18 @@ input:focus{border-color:#534AB7}
 
 </div>
 <script>
-var API='https://meta-tuteur.metatuteur.workers.dev';
+var API='https://studio-api.metatuteur.workers.dev';
 var niveau='CM2', selectedPersona=null, personasData=[], sujet='';
 
-function showErr(id, msg){
+function showErr(id,msg){
   var el=document.getElementById(id);
-  el.textContent=msg;
-  el.classList.remove('hidden');
+  el.textContent=msg;el.classList.remove('hidden');
   setTimeout(function(){el.classList.add('hidden')},6000);
 }
 
 function selectNiveau(b,v){
   document.querySelectorAll('.niveau-btn').forEach(function(x){x.classList.remove('selected')});
-  b.classList.add('selected');
-  niveau=v;
+  b.classList.add('selected');niveau=v;
 }
 
 async function analyserSujet(){
@@ -122,21 +120,17 @@ async function analyserSujet(){
   if(!sujet){showErr('erreur1','Entre un sujet !');return;}
   document.getElementById('personasSection').classList.remove('hidden');
   document.getElementById('personaGrid').innerHTML='<div style="grid-column:1/-1;padding:12px;color:#666;font-size:13px">🔍 Recherche des personnages...</div>';
-
   try{
     var r=await fetch(API+'/api/claude',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        prompt:'Pour le sujet "'+sujet+'" niveau '+niveau+', propose 4 personnages historiques ou scientifiques parfaits pour expliquer ce concept. Reponds UNIQUEMENT en JSON valide, sans markdown, sans backticks, sans explication. Format exact: {"personnages":[{"emoji":"...","nom":"...","titre":"...","accroche":"..."},{"emoji":"...","nom":"...","titre":"...","accroche":"..."},{"emoji":"...","nom":"...","titre":"...","accroche":"..."},{"emoji":"...","nom":"...","titre":"...","accroche":"..."}]}'
-      })
+      body:JSON.stringify({prompt:'Pour le sujet "'+sujet+'" niveau '+niveau+', propose 4 personnages historiques ou scientifiques. Reponds UNIQUEMENT en JSON valide sans markdown: {"personnages":[{"emoji":"...","nom":"...","titre":"...","accroche":"..."}]}'})
     });
     if(!r.ok) throw new Error('Erreur serveur: '+r.status);
     var data=await r.json();
-    if(!data.text) throw new Error('Pas de réponse du serveur');
-    var clean=data.text.trim().replace(/^```json/,'').replace(/^```/,'').replace(/```$/,'').trim();
+    if(!data.text) throw new Error('Pas de réponse');
+    var clean=data.text.trim().replace(/```json|```/g,'').trim();
     var parsed=JSON.parse(clean);
-    if(!parsed.personnages) throw new Error('Format invalide');
     personasData=parsed.personnages;
     renderPersonas();
   }catch(e){
@@ -155,8 +149,7 @@ function renderPersonas(){
     c.innerHTML='<div class="persona-emoji">'+p.emoji+'</div><div class="persona-name">'+p.nom+'</div><div class="persona-role">'+p.titre+'</div><div class="persona-quote">"'+p.accroche+'"</div>';
     c.onclick=function(){
       document.querySelectorAll('.persona-card').forEach(function(x){x.classList.remove('selected')});
-      c.classList.add('selected');
-      selectedPersona=personasData[i];
+      c.classList.add('selected');selectedPersona=personasData[i];
     };
     grid.appendChild(c);
   });
@@ -179,23 +172,21 @@ async function lancerProduction(){
   document.getElementById('productionSection').classList.remove('hidden');
   document.getElementById('resultSection').classList.add('hidden');
   document.getElementById('productionSection').scrollIntoView({behavior:'smooth'});
-
   try{
     setStep(1,'En cours...'); setStatus('Génération du script...');
     var r1=await fetch(API+'/api/claude',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({prompt:'Tu es '+selectedPersona.nom+'. Ecris un script video de 45 secondes pour expliquer "'+sujet+'" a des parents d eleves de '+niveau+'. Parle a la premiere personne, commence par une accroche forte, utilise une metaphore du quotidien, termine par un appel a l action. Maximum 120 mots. Reponds uniquement avec le texte du script, rien d autre.'})
+      body:JSON.stringify({prompt:'Tu es '+selectedPersona.nom+'. Ecris un script video de 45 secondes pour expliquer "'+sujet+'" a des parents d eleves de '+niveau+'. Parle a la premiere personne, accroche forte, metaphore du quotidien, appel a l action. Max 120 mots. Uniquement le texte du script.'})
     });
-    var d1=await r1.json();
-    var script=d1.text;
+    var d1=await r1.json(); var script=d1.text;
     setStep(1,'Fait');
 
     setStep(2,'En cours...'); setStatus('Création du portrait IA...');
     var r2=await fetch(API+'/api/image',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({prompt:'Realistic portrait of '+selectedPersona.nom+', historical painting style, cinematic lighting, neutral background, expressive face, high quality, 8k, professional photography'})
+      body:JSON.stringify({prompt:'Realistic portrait of '+selectedPersona.nom+', historical painting style, cinematic lighting, neutral background, high quality, 8k'})
     });
     var d2=await r2.json();
     if(d2.error) throw new Error('Image: '+d2.error);
@@ -218,7 +209,6 @@ async function lancerProduction(){
     document.getElementById('downloadBtn').href=videoUrl;
     document.getElementById('resultSection').classList.remove('hidden');
     document.getElementById('resultSection').scrollIntoView({behavior:'smooth'});
-
   }catch(e){
     setStatus('Erreur : '+e.message,'error');
   }
@@ -229,8 +219,7 @@ function reset(){
   ['personasSection','productionSection','resultSection'].forEach(function(id){
     document.getElementById(id).classList.add('hidden');
   });
-  selectedPersona=null;
-  window.scrollTo(0,0);
+  selectedPersona=null;window.scrollTo(0,0);
 }
 </script>
 </body>
