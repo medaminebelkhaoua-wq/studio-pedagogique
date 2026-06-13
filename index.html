@@ -44,6 +44,7 @@ input:focus{border-color:#534AB7}
 .niveau-btn.selected{background:#534AB7;color:#fff;border-color:#534AB7}
 .hidden{display:none}
 .error-msg{color:#791F1F;background:#FCEBEB;border-radius:8px;padding:10px;font-size:13px;margin-top:8px}
+#videoCanvas{width:100%;border-radius:10px;display:block}
 </style>
 </head>
 <body>
@@ -52,18 +53,18 @@ input:focus{border-color:#534AB7}
   <div class="card">
     <div class="card-header"><div class="step-badge">1</div><h3>Sujet du contenu</h3></div>
     <div class="card-body">
-      <div><div class="label">Concept à expliquer</div>
-        <input type="text" id="sujetInput" placeholder="Ex: La Révolution française, les fractions...">
+      <div><div class="label">Concept a expliquer</div>
+        <input type="text" id="sujetInput" placeholder="Ex: La Revolution francaise, les fractions...">
       </div>
       <div><div class="label">Niveau</div>
         <div class="niveau-row">
           <button class="niveau-btn selected" onclick="selectNiveau(this,'CM2')">CM2</button>
           <button class="niveau-btn" onclick="selectNiveau(this,'CM1')">CM1</button>
           <button class="niveau-btn" onclick="selectNiveau(this,'CE2')">CE2</button>
-          <button class="niveau-btn" onclick="selectNiveau(this,'College')">Collège</button>
+          <button class="niveau-btn" onclick="selectNiveau(this,'College')">College</button>
         </div>
       </div>
-      <button class="btn btn-primary btn-full" onclick="analyserSujet()">✨ Trouver les personnages</button>
+      <button class="btn btn-primary btn-full" onclick="analyserSujet()">Trouver les personnages</button>
       <div id="erreur1" class="error-msg hidden"></div>
     </div>
   </div>
@@ -72,7 +73,7 @@ input:focus{border-color:#534AB7}
     <div class="card-header"><div class="step-badge">2</div><h3>Choisir le personnage</h3></div>
     <div class="card-body">
       <div id="personaGrid" class="persona-grid"></div>
-      <button class="btn btn-primary btn-full" onclick="lancerProduction()">🎬 Générer la vidéo</button>
+      <button class="btn btn-primary btn-full" onclick="lancerProduction()">Generer la video</button>
       <div id="erreur2" class="error-msg hidden"></div>
     </div>
   </div>
@@ -80,22 +81,20 @@ input:focus{border-color:#534AB7}
   <div class="card hidden" id="productionSection">
     <div class="card-header"><div class="step-badge">3</div><h3>Production en cours...</h3></div>
     <div class="card-body">
-      <div id="step1" class="step-row active"><span class="step-icon">✍️</span><span class="step-label">Génération du script</span><span class="step-status" id="s1status">En cours...</span></div>
-      <div id="step2" class="step-row"><span class="step-icon">🎨</span><span class="step-label">Création du portrait IA</span><span class="step-status" id="s2status">En attente</span></div>
-      <div id="step3" class="step-row"><span class="step-icon">🎤</span><span class="step-label">Animation de l'avatar</span><span class="step-status" id="s3status">En attente</span></div>
-      <div id="step4" class="step-row"><span class="step-icon">✅</span><span class="step-label">Vidéo prête</span><span class="step-status" id="s4status">En attente</span></div>
-      <div id="statusMsg" class="status-box status-loading"><span>⏳</span><span id="statusText">Démarrage...</span></div>
+      <div id="step1" class="step-row active"><span class="step-icon">&#x270D;</span><span class="step-label">Generation du script</span><span class="step-status" id="s1status">En cours...</span></div>
+      <div id="step2" class="step-row"><span class="step-icon">&#x1F3A8;</span><span class="step-label">Creation du portrait IA</span><span class="step-status" id="s2status">En attente</span></div>
+      <div id="step3" class="step-row"><span class="step-icon">&#x1F3A4;</span><span class="step-label">Generation de la voix</span><span class="step-status" id="s3status">En attente</span></div>
+      <div id="step4" class="step-row"><span class="step-icon">&#x1F3AC;</span><span class="step-label">Assemblage de la video</span><span class="step-status" id="s4status">En attente</span></div>
+      <div id="statusMsg" class="status-box status-loading"><span>&#x23F3;</span><span id="statusText">Demarrage...</span></div>
     </div>
   </div>
 
   <div class="card hidden" id="resultSection">
-    <div class="card-header"><div class="step-badge">✓</div><h3>Vidéo prête !</h3></div>
-    <div style="text-align:center;padding:20px">
-      <video id="videoPlayer" controls style="width:100%;border-radius:10px;margin-bottom:12px"></video>
-      <br>
-      <a id="downloadBtn" class="btn btn-primary" download="video.mp4">⬇️ Télécharger</a>
-      <br><br>
-      <button class="btn btn-secondary" onclick="reset()">🔄 Nouvelle vidéo</button>
+    <div class="card-header"><div class="step-badge">&#x2713;</div><h3>Video prete !</h3></div>
+    <div style="padding:16px;display:flex;flex-direction:column;gap:12px">
+      <canvas id="videoCanvas" width="1080" height="1920"></canvas>
+      <button class="btn btn-primary btn-full" onclick="telecharger()">Telecharger la video</button>
+      <button class="btn btn-secondary btn-full" onclick="reset()">Nouvelle video</button>
     </div>
   </div>
 
@@ -103,6 +102,7 @@ input:focus{border-color:#534AB7}
 <script>
 var API='https://studio-api.metatuteur.workers.dev';
 var niveau='CM2', selectedPersona=null, personasData=[], sujet='';
+var generatedImageUrl='', generatedAudioB64='', generatedScript='';
 
 function showErr(id,msg){
   var el=document.getElementById(id);
@@ -119,16 +119,15 @@ async function analyserSujet(){
   sujet=document.getElementById('sujetInput').value.trim();
   if(!sujet){showErr('erreur1','Entre un sujet !');return;}
   document.getElementById('personasSection').classList.remove('hidden');
-  document.getElementById('personaGrid').innerHTML='<div style="grid-column:1/-1;padding:12px;color:#666;font-size:13px">🔍 Recherche des personnages...</div>';
+  document.getElementById('personaGrid').innerHTML='<div style="grid-column:1/-1;padding:12px;color:#666;font-size:13px">Recherche des personnages...</div>';
   try{
     var r=await fetch(API+'/api/claude',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({prompt:'Pour le sujet "'+sujet+'" niveau '+niveau+', propose 4 personnages historiques ou scientifiques. Reponds UNIQUEMENT en JSON valide sans markdown: {"personnages":[{"emoji":"...","nom":"...","titre":"...","accroche":"..."}]}'})
+      body:JSON.stringify({prompt:'Pour le sujet "'+sujet+'" niveau '+niveau+', propose 4 personnages historiques ou scientifiques expressifs et charismatiques. Pour chaque personnage indique aussi son genre (homme/femme). Reponds UNIQUEMENT en JSON valide sans markdown: {"personnages":[{"emoji":"...","nom":"...","titre":"...","accroche":"...","genre":"homme ou femme"}]}'})
     });
     if(!r.ok) throw new Error('Erreur serveur: '+r.status);
     var data=await r.json();
-    if(!data.text) throw new Error('Pas de réponse');
     var clean=data.text.trim().replace(/```json|```/g,'').trim();
     var parsed=JSON.parse(clean);
     personasData=parsed.personnages;
@@ -158,7 +157,7 @@ function renderPersonas(){
 function setStep(n,status){
   for(var i=1;i<=4;i++){
     document.getElementById('step'+i).className='step-row'+(i<n?' done':i===n?' active':'');
-    document.getElementById('s'+i+'status').textContent=i<n?'✅ Fait':i===n?status:'En attente';
+    document.getElementById('s'+i+'status').textContent=i<n?'Fait':i===n?status:'En attente';
   }
 }
 
@@ -172,46 +171,133 @@ async function lancerProduction(){
   document.getElementById('productionSection').classList.remove('hidden');
   document.getElementById('resultSection').classList.add('hidden');
   document.getElementById('productionSection').scrollIntoView({behavior:'smooth'});
+
   try{
-    setStep(1,'En cours...'); setStatus('Génération du script...');
+    // Etape 1 : Script
+    setStep(1,'En cours...'); setStatus('Generation du script...');
     var r1=await fetch(API+'/api/claude',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({prompt:'Tu es '+selectedPersona.nom+'. Ecris un script video de 45 secondes pour expliquer "'+sujet+'" a des parents d eleves de '+niveau+'. Parle a la premiere personne, accroche forte, metaphore du quotidien, appel a l action. Max 120 mots. Uniquement le texte du script.'})
+      body:JSON.stringify({prompt:'Tu es '+selectedPersona.nom+', '+selectedPersona.titre+'. Ecris un script video de 45 secondes TRES expressif et dynamique pour expliquer "'+sujet+'" a des parents d eleves de '+niveau+'. Parle a la premiere personne avec beaucoup de personnalite, utilise des expressions de ton epoque adaptees, commence par une accroche surprenante, explique avec une metaphore du quotidien moderne, termine par un appel a l action. Sois drole et charismatique. Max 120 mots. Uniquement le texte du script.'})
     });
-    var d1=await r1.json(); var script=d1.text;
+    var d1=await r1.json();
+    generatedScript=d1.text;
     setStep(1,'Fait');
 
-    setStep(2,'En cours...'); setStatus('Création du portrait IA...');
+    // Etape 2 : Portrait
+    setStep(2,'En cours...'); setStatus('Creation du portrait...');
     var r2=await fetch(API+'/api/image',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({prompt:'Realistic portrait of '+selectedPersona.nom+', historical painting style, cinematic lighting, neutral background, high quality, 8k'})
+      body:JSON.stringify({prompt:'Hyper realistic charismatic expressive portrait of '+selectedPersona.nom+', vibrant colors, warm cinematic lighting, slight smile, confident look, detailed face, 8k, photorealistic, dramatic background'})
     });
     var d2=await r2.json();
     if(d2.error) throw new Error('Image: '+d2.error);
-    var imageUrl=d2.url;
+    generatedImageUrl=d2.url;
     setStep(2,'Fait');
 
-    setStep(3,'En cours...'); setStatus("Animation de l'avatar (1-2 minutes)...");
-    var r3=await fetch(API+'/api/video',{
+    // Etape 3 : Voix
+    setStep(3,'En cours...'); setStatus('Generation de la voix...');
+    var r3=await fetch(API+'/api/voice',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({script:script,imageUrl:imageUrl})
+      body:JSON.stringify({script:generatedScript, persona:selectedPersona.nom, genre:selectedPersona.genre||'homme'})
     });
     var d3=await r3.json();
-    if(d3.error) throw new Error('Vidéo: '+d3.error);
-    var videoUrl=d3.url;
+    if(d3.error) throw new Error('Voix: '+d3.error);
+    generatedAudioB64=d3.audio;
     setStep(3,'Fait');
 
-    setStep(4,'✅ Prête !'); setStatus('Vidéo générée avec succès !','success');
-    document.getElementById('videoPlayer').src=videoUrl;
-    document.getElementById('downloadBtn').href=videoUrl;
+    // Etape 4 : Assemblage
+    setStep(4,'En cours...'); setStatus('Assemblage de la video...');
+    await assemblerVideo();
+    setStep(4,'Prete !'); setStatus('Video generee avec succes !','success');
     document.getElementById('resultSection').classList.remove('hidden');
     document.getElementById('resultSection').scrollIntoView({behavior:'smooth'});
+
   }catch(e){
     setStatus('Erreur : '+e.message,'error');
   }
+}
+
+async function assemblerVideo(){
+  return new Promise(function(resolve, reject){
+    var canvas=document.getElementById('videoCanvas');
+    var ctx=canvas.getContext('2d');
+    var img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=function(){
+      var audio=new Audio('data:audio/mpeg;base64,'+generatedAudioB64);
+      var stream=canvas.captureStream(30);
+      var audioCtx=new AudioContext();
+      var source=audioCtx.createMediaElementSource(audio);
+      var dest=audioCtx.createMediaStreamDestination();
+      source.connect(dest);
+      source.connect(audioCtx.destination);
+      var combined=new MediaStream([...stream.getTracks(),...dest.stream.getTracks()]);
+      var recorder=new MediaRecorder(combined,{mimeType:'video/webm;codecs=vp9'});
+      var chunks=[];
+      recorder.ondataavailable=function(e){if(e.data.size>0)chunks.push(e.data)};
+      recorder.onstop=function(){
+        window._videoBlob=new Blob(chunks,{type:'video/webm'});
+        resolve();
+      };
+      var startTime=Date.now();
+      var duration=audio.duration*1000||45000;
+      var scale=1;
+      var targetScale=1.15;
+      function draw(){
+        var elapsed=Date.now()-startTime;
+        var progress=Math.min(elapsed/duration,1);
+        scale=1+(targetScale-1)*progress;
+        var offsetX=(canvas.width*(scale-1))/2;
+        var offsetY=(canvas.height*(scale-1))/2;
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        ctx.save();
+        ctx.translate(-offsetX,-offsetY);
+        ctx.scale(scale,scale);
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        ctx.restore();
+        // Sous-titres
+        var words=generatedScript.split(' ');
+        var wordIndex=Math.floor(progress*words.length);
+        var currentWords=words.slice(Math.max(0,wordIndex-4),wordIndex+1).join(' ');
+        ctx.fillStyle='rgba(0,0,0,0.5)';
+        ctx.fillRect(0,canvas.height-220,canvas.width,160);
+        ctx.fillStyle='#FFFFFF';
+        ctx.font='bold 52px system-ui';
+        ctx.textAlign='center';
+        ctx.shadowColor='black';
+        ctx.shadowBlur=10;
+        ctx.fillText(currentWords,canvas.width/2,canvas.height-120);
+        ctx.shadowBlur=0;
+        // Nom du personnage
+        ctx.fillStyle='rgba(83,74,183,0.85)';
+        ctx.fillRect(0,60,canvas.width,90);
+        ctx.fillStyle='#FFFFFF';
+        ctx.font='bold 48px system-ui';
+        ctx.fillText(selectedPersona.nom+' - '+selectedPersona.titre,canvas.width/2,120);
+        if(progress<1) requestAnimationFrame(draw);
+      }
+      audio.addEventListener('loadedmetadata',function(){
+        recorder.start();
+        audio.play();
+        draw();
+        setTimeout(function(){recorder.stop();audio.pause();},audio.duration*1000+500);
+      });
+      audio.load();
+    };
+    img.onerror=reject;
+    img.src=generatedImageUrl;
+  });
+}
+
+function telecharger(){
+  if(!window._videoBlob) return;
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(window._videoBlob);
+  a.download='video-pedagogique.webm';
+  a.click();
 }
 
 function reset(){
@@ -219,7 +305,8 @@ function reset(){
   ['personasSection','productionSection','resultSection'].forEach(function(id){
     document.getElementById(id).classList.add('hidden');
   });
-  selectedPersona=null;window.scrollTo(0,0);
+  selectedPersona=null;
+  window.scrollTo(0,0);
 }
 </script>
 </body>
