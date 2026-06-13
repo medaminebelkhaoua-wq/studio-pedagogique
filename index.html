@@ -3,166 +3,689 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Studio Contenu Pedagogique</title>
+<title>MétaTuteur Studio — Vidéos pédagogiques virales</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;font-family:system-ui,sans-serif}
-body{background:#f5f5f5;display:flex;justify-content:center;padding:1rem}
-#app{width:100%;max-width:560px;display:flex;flex-direction:column;gap:14px}
-.card{background:#fff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden}
-.card-header{padding:12px 16px;border-bottom:1px solid #e5e5e5;display:flex;align-items:center;gap:10px;background:#fafafa}
-.step-badge{width:24px;height:24px;border-radius:50%;background:#EEEDFE;color:#3C3489;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.card-header h3{font-size:14px;font-weight:600;color:#111}
-.card-body{padding:16px;display:flex;flex-direction:column;gap:12px}
-input{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;color:#111;background:#fff;outline:none}
-input:focus{border-color:#534AB7}
-.btn{padding:9px 18px;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;display:inline-flex;align-items:center;gap:6px}
-.btn-primary{background:#534AB7;color:#fff}
-.btn-primary:hover{background:#3C3489}
-.btn-primary:disabled{opacity:.55;cursor:not-allowed}
-.btn-secondary{background:#fff;color:#111;border:1px solid #ddd}
-.btn-full{width:100%;justify-content:center}
-.persona-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.persona-card{border:1px solid #e5e5e5;border-radius:10px;padding:12px;cursor:pointer;transition:all .15s}
-.persona-card:hover{border-color:#534AB7}
-.persona-card.selected{border:2px solid #534AB7;background:#EEEDFE}
-.persona-emoji{font-size:26px;margin-bottom:6px}
-.persona-name{font-size:13px;font-weight:600;color:#111;margin-bottom:2px}
-.persona-role{font-size:11px;color:#666;margin-bottom:6px}
-.persona-quote{font-size:11px;color:#534AB7;font-style:italic;line-height:1.4}
-.step-row{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid #e5e5e5;border-radius:8px;font-size:13px}
-.step-row.active{border-color:#534AB7;background:#EEEDFE}
-.step-row.done{border-color:#3B6D11;background:#EAF3DE}
-.step-icon{font-size:18px;flex-shrink:0}
-.step-label{flex:1;font-weight:500;color:#111}
-.step-status{font-size:11px;color:#666}
-.status-box{padding:12px;border-radius:8px;font-size:13px;line-height:1.6;display:flex;align-items:flex-start;gap:10px}
-.status-loading{background:#EEEDFE;color:#3C3489}
-.status-success{background:#EAF3DE;color:#27500A}
-.status-error{background:#FCEBEB;color:#791F1F}
-.label{font-size:12px;color:#666;font-weight:500;margin-bottom:4px}
-.niveau-row{display:flex;gap:8px;flex-wrap:wrap}
-.niveau-btn{padding:6px 14px;border:1px solid #ddd;border-radius:20px;background:#fff;cursor:pointer;font-size:13px}
-.niveau-btn.selected{background:#534AB7;color:#fff;border-color:#534AB7}
-.hidden{display:none}
-.error-msg{color:#791F1F;background:#FCEBEB;border-radius:8px;padding:10px;font-size:13px;margin-top:8px}
-.share-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px}
-.btn-insta{background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);color:#fff}
-.btn-tiktok{background:#010101;color:#fff}
-.btn-youtube{background:#FF0000;color:#fff}
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink: #0c0c14;
+  --ink2: #3a3a52;
+  --ink3: #7a7a96;
+  --bg: #f4f3fa;
+  --bg2: #eceaf8;
+  --surface: #ffffff;
+  --accent: #5c4ef5;
+  --accent2: #9b8bff;
+  --accent-glow: rgba(92,78,245,0.18);
+  --gold: #f5b731;
+  --green: #22c55e;
+  --green-bg: #dcfce7;
+  --red: #ef4444;
+  --red-bg: #fee2e2;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 2px 16px rgba(92,78,245,0.10);
+  --shadow-lg: 0 8px 40px rgba(92,78,245,0.18);
+}
+
+body {
+  background: var(--bg);
+  font-family: 'Inter', system-ui, sans-serif;
+  color: var(--ink);
+  min-height: 100vh;
+  padding: 0;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--ink);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.header-logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+  color: #fff;
+  letter-spacing: -0.3px;
+}
+.header-logo span { color: var(--accent2); }
+.header-tag {
+  font-size: 11px;
+  background: var(--accent-glow);
+  color: var(--accent2);
+  border: 1px solid rgba(155,139,255,0.3);
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-weight: 500;
+  margin-left: auto;
+}
+
+/* ── MAIN LAYOUT ── */
+.main {
+  max-width: 540px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── STEP HERO ── */
+.step-hero {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 2px;
+}
+.step-num {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.step-num.done { background: var(--green); }
+.step-title {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 16px;
+  color: var(--ink);
+}
+.step-sub {
+  font-size: 12px;
+  color: var(--ink3);
+  margin-top: 1px;
+}
+
+/* ── CARD ── */
+.card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.card-inner { padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+
+/* ── INPUTS ── */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+input[type=text] {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #e2e0f0;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-family: 'Inter', sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+input[type=text]:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+  background: #fff;
+}
+input[type=text]::placeholder { color: var(--ink3); }
+
+/* ── NIVEAU PILLS ── */
+.niveau-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.niveau-btn {
+  padding: 7px 16px;
+  border: 1.5px solid #e2e0f0;
+  border-radius: 20px;
+  background: var(--bg);
+  color: var(--ink2);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: 'Inter', sans-serif;
+}
+.niveau-btn:hover { border-color: var(--accent); color: var(--accent); }
+.niveau-btn.selected {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(92,78,245,0.3);
+}
+
+/* ── BUTTONS ── */
+.btn {
+  padding: 12px 22px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all .15s;
+  text-decoration: none;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(92,78,245,0.35);
+}
+.btn-primary:hover { background: #4a3ee0; box-shadow: 0 6px 20px rgba(92,78,245,0.45); transform: translateY(-1px); }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-full { width: 100%; }
+.btn-ghost {
+  background: transparent;
+  color: var(--ink2);
+  border: 1.5px solid #e2e0f0;
+}
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── PERSONA GRID ── */
+.persona-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.persona-card {
+  border: 1.5px solid #e2e0f0;
+  border-radius: var(--radius-sm);
+  padding: 14px 12px;
+  cursor: pointer;
+  transition: all .18s;
+  background: var(--bg);
+  position: relative;
+}
+.persona-card:hover { border-color: var(--accent); background: var(--bg2); transform: translateY(-2px); box-shadow: var(--shadow); }
+.persona-card.selected {
+  border-color: var(--accent);
+  border-width: 2px;
+  background: #f0eeff;
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.persona-card.selected::after {
+  content: '✓';
+  position: absolute;
+  top: 8px; right: 10px;
+  width: 20px; height: 20px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.persona-emoji { font-size: 28px; margin-bottom: 8px; }
+.persona-name { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+.persona-role { font-size: 11px; color: var(--ink3); margin-bottom: 6px; font-weight: 500; }
+.persona-quote { font-size: 11px; color: var(--accent); font-style: italic; line-height: 1.5; }
+
+/* ── SCRIPT PREVIEW ── */
+.script-box {
+  background: var(--bg);
+  border: 1.5px solid #e2e0f0;
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ink2);
+  max-height: 200px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+.hook-highlight {
+  background: linear-gradient(135deg, #fff8e1, #fff3cd);
+  border: 1.5px solid var(--gold);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #7a5200;
+  line-height: 1.5;
+  margin-bottom: 4px;
+}
+.hook-highlight::before {
+  content: '⚡ Hook (3 premières secondes)';
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--gold);
+  margin-bottom: 4px;
+  font-weight: 700;
+}
+
+/* ── PRODUCTION STEPS ── */
+.prod-steps { display: flex; flex-direction: column; gap: 8px; }
+.prod-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid #e2e0f0;
+  transition: all .2s;
+}
+.prod-step.active {
+  border-color: var(--accent);
+  background: var(--bg2);
+}
+.prod-step.done {
+  border-color: var(--green);
+  background: var(--green-bg);
+}
+.prod-step-icon { font-size: 20px; flex-shrink: 0; width: 28px; text-align: center; }
+.prod-step-info { flex: 1; }
+.prod-step-label { font-size: 13px; font-weight: 600; color: var(--ink); }
+.prod-step-detail { font-size: 11px; color: var(--ink3); margin-top: 2px; }
+.prod-step-status { font-size: 11px; font-weight: 600; color: var(--ink3); flex-shrink: 0; }
+.prod-step.active .prod-step-status { color: var(--accent); }
+.prod-step.done .prod-step-status { color: var(--green); }
+
+/* ── SPINNER ── */
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  width: 14px; height: 14px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+.prod-step.active .prod-step-status { display: flex; align-items: center; gap: 5px; }
+
+/* ── STATUS BAR ── */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+.status-loading { background: var(--bg2); color: var(--accent); border: 1px solid rgba(92,78,245,0.2); }
+.status-success { background: var(--green-bg); color: #15803d; border: 1px solid rgba(34,197,94,0.3); }
+.status-error { background: var(--red-bg); color: #b91c1c; border: 1px solid rgba(239,68,68,0.3); }
+
+/* ── THUMBNAILS ── */
+.thumbnail-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.thumbnail-wrap { position: relative; border-radius: var(--radius-sm); overflow: hidden; aspect-ratio: 16/9; background: var(--bg); }
+.thumbnail-wrap img { width: 100%; height: 100%; object-fit: cover; }
+.thumbnail-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.8));
+  color: #fff; font-size: 10px; padding: 6px 8px 6px;
+  font-weight: 600;
+}
+
+/* ── VIDEO RESULT ── */
+.result-inner { padding: 20px; text-align: center; display: flex; flex-direction: column; gap: 16px; }
+.video-wrap {
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--ink);
+  aspect-ratio: 9/16;
+  max-height: 420px;
+  margin: 0 auto;
+  width: min(240px, 100%);
+}
+video { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.share-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.share-hint { font-size: 12px; color: var(--ink3); line-height: 1.5; }
+.platforms { display: flex; flex-direction: column; gap: 8px; }
+.platform-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Inter', sans-serif;
+  transition: transform .15s, box-shadow .15s;
+}
+.platform-btn:hover { transform: translateX(3px); box-shadow: var(--shadow); }
+.platform-btn .picon { font-size: 20px; }
+.platform-btn .pname { flex: 1; text-align: left; }
+.platform-btn .parrow { opacity: 0.6; font-size: 12px; }
+.btn-dl { background: var(--accent); color: #fff; box-shadow: 0 4px 14px rgba(92,78,245,0.3); }
+.btn-ig { background: linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888); color: #fff; }
+.btn-tt { background: #010101; color: #fff; border: 1px solid #333; }
+.btn-yt { background: #FF0000; color: #fff; }
+
+/* ── ERROR ── */
+.err-msg {
+  background: var(--red-bg);
+  color: #b91c1c;
+  border: 1px solid rgba(239,68,68,0.3);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ── LOADING SKELETON ── */
+@keyframes shimmer {
+  0% { background-position: -300px 0; }
+  100% { background-position: 300px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #e2e0f0 25%, #f0eeff 50%, #e2e0f0 75%);
+  background-size: 600px 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* ── HIDDEN ── */
+.hidden { display: none !important; }
+
+/* ── TRANSITIONS ── */
+.fade-in { animation: fadeIn .3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ── VOICE BADGE ── */
+.voice-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f0eeff;
+  border: 1px solid rgba(92,78,245,0.2);
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: var(--accent);
+  font-weight: 600;
+}
 </style>
 </head>
 <body>
-<div id="app">
-  <div class="card">
-    <div class="card-header"><div class="step-badge">1</div><h3>Sujet du contenu</h3></div>
-    <div class="card-body">
-      <div>
-        <div class="label">Concept a expliquer</div>
-        <input type="text" id="sujetInput" placeholder="Ex: La Revolution francaise, les fractions...">
+
+<header class="header">
+  <div class="header-logo">Méta<span>Tuteur</span> Studio</div>
+  <div class="header-tag">✨ Vidéos virales</div>
+</header>
+
+<main class="main">
+
+  <!-- ───── ÉTAPE 1 : SUJET ───── -->
+  <div class="card fade-in" id="cardSujet">
+    <div class="card-inner">
+      <div class="step-hero">
+        <div class="step-num" id="badge1">1</div>
+        <div>
+          <div class="step-title">Quel concept expliquer ?</div>
+          <div class="step-sub">Ton futur Reel pédagogique commence ici</div>
+        </div>
       </div>
-      <div>
-        <div class="label">Niveau</div>
+      <div class="field">
+        <label class="label">Concept à expliquer</label>
+        <input type="text" id="sujetInput" placeholder="Ex : La photosynthèse, les fractions, la Révolution…">
+      </div>
+      <div class="field">
+        <label class="label">Niveau</label>
         <div class="niveau-row">
           <button class="niveau-btn selected" data-niveau="CM2">CM2</button>
           <button class="niveau-btn" data-niveau="CM1">CM1</button>
           <button class="niveau-btn" data-niveau="CE2">CE2</button>
-          <button class="niveau-btn" data-niveau="College">College</button>
+          <button class="niveau-btn" data-niveau="Collège">Collège</button>
+          <button class="niveau-btn" data-niveau="Lycée">Lycée</button>
         </div>
       </div>
-      <button class="btn btn-primary btn-full" id="btnAnalyser">Trouver les personnages</button>
-      <div id="erreur1" class="error-msg hidden"></div>
+      <button class="btn btn-primary btn-full" id="btnAnalyser">
+        <span>Trouver les personnages</span> <span>→</span>
+      </button>
+      <div id="erreur1" class="err-msg hidden"></div>
     </div>
   </div>
-  <div class="card hidden" id="personasSection">
-    <div class="card-header"><div class="step-badge">2</div><h3>Choisir le personnage</h3></div>
-    <div class="card-body">
-      <div id="personaGrid" class="persona-grid"></div>
-      <button class="btn btn-primary btn-full" id="btnProduire">Generer la video</button>
-      <div id="erreur2" class="error-msg hidden"></div>
+
+  <!-- ───── ÉTAPE 2 : PERSONAS ───── -->
+  <div class="card fade-in hidden" id="cardPersonas">
+    <div class="card-inner">
+      <div class="step-hero">
+        <div class="step-num" id="badge2">2</div>
+        <div>
+          <div class="step-title">Choisis ton personnage</div>
+          <div class="step-sub">Chacun a son style pour captiver ton audience</div>
+        </div>
+      </div>
+      <div id="personaGrid" class="persona-grid">
+        <div class="persona-card skeleton" style="height:120px"></div>
+        <div class="persona-card skeleton" style="height:120px"></div>
+        <div class="persona-card skeleton" style="height:120px"></div>
+        <div class="persona-card skeleton" style="height:120px"></div>
+      </div>
+      <div id="erreur2" class="err-msg hidden"></div>
     </div>
   </div>
-  <div class="card hidden" id="productionSection">
-    <div class="card-header"><div class="step-badge">3</div><h3>Production en cours...</h3></div>
-    <div class="card-body">
-      <div id="step1" class="step-row active">
-        <span class="step-icon">✍️</span>
-        <span class="step-label">Script par <span id="personaNomStep"></span></span>
-        <span class="step-status" id="s1status">En cours...</span>
+
+  <!-- ───── ÉTAPE 3 : SCRIPT PREVIEW ───── -->
+  <div class="card fade-in hidden" id="cardScript">
+    <div class="card-inner">
+      <div class="step-hero">
+        <div class="step-num" id="badge3">3</div>
+        <div>
+          <div class="step-title">Script viral généré</div>
+          <div class="step-sub">Optimisé hook 3 sec + storytelling parent</div>
+        </div>
       </div>
-      <div id="step2" class="step-row">
-        <span class="step-icon">🎨</span>
-        <span class="step-label">Portrait IA du personnage</span>
-        <span class="step-status" id="s2status">En attente</span>
+      <div id="hookPreview" class="hook-highlight hidden"></div>
+      <div id="scriptPreview" class="script-box">Génération en cours…</div>
+      <div id="btnProduireWrap">
+        <button class="btn btn-primary btn-full" id="btnProduire" disabled>
+          <span>🎬</span> <span>Générer la vidéo</span>
+        </button>
       </div>
-      <div id="step3" class="step-row">
-        <span class="step-icon">🎙️</span>
-        <span class="step-label">Voix FR native + animation HeyGen</span>
-        <span class="step-status" id="s3status">En attente</span>
+      <div id="erreur3" class="err-msg hidden"></div>
+    </div>
+  </div>
+
+  <!-- ───── ÉTAPE 4 : PRODUCTION ───── -->
+  <div class="card fade-in hidden" id="cardProd">
+    <div class="card-inner">
+      <div class="step-hero">
+        <div class="step-num" id="badge4">4</div>
+        <div>
+          <div class="step-title">Production en cours</div>
+          <div class="step-sub" id="prodSubtitle">Patience, la magie opère…</div>
+        </div>
       </div>
-      <div id="step4" class="step-row">
-        <span class="step-icon">✅</span>
-        <span class="step-label">Video prete</span>
-        <span class="step-status" id="s4status">En attente</span>
+      <div class="prod-steps">
+        <div class="prod-step" id="ps1">
+          <div class="prod-step-icon">✍️</div>
+          <div class="prod-step-info">
+            <div class="prod-step-label">Script viral</div>
+            <div class="prod-step-detail">Hook + storytelling émotionnel</div>
+          </div>
+          <div class="prod-step-status" id="ps1s">En attente</div>
+        </div>
+        <div class="prod-step" id="ps2">
+          <div class="prod-step-icon">🎨</div>
+          <div class="prod-step-info">
+            <div class="prod-step-label">Portrait IA expressif</div>
+            <div class="prod-step-detail">Optimisé pour visage caméra</div>
+          </div>
+          <div class="prod-step-status" id="ps2s">En attente</div>
+        </div>
+        <div class="prod-step" id="ps3">
+          <div class="prod-step-icon">🖼️</div>
+          <div class="prod-step-info">
+            <div class="prod-step-label">Miniature YouTube</div>
+            <div class="prod-step-detail">Format 16:9, fort contraste</div>
+          </div>
+          <div class="prod-step-status" id="ps3s">En attente</div>
+        </div>
+        <div class="prod-step" id="ps4">
+          <div class="prod-step-icon">🎙️</div>
+          <div class="prod-step-info">
+            <div class="prod-step-label">Voix FR naturelle + HeyGen</div>
+            <div class="prod-step-detail" id="ps4detail">Sélection meilleure voix</div>
+          </div>
+          <div class="prod-step-status" id="ps4s">En attente</div>
+        </div>
+        <div class="prod-step" id="ps5">
+          <div class="prod-step-icon">⚡</div>
+          <div class="prod-step-info">
+            <div class="prod-step-label">Rendu vidéo 9:16 + sous-titres</div>
+            <div class="prod-step-detail">Format Reels/TikTok/Shorts</div>
+          </div>
+          <div class="prod-step-status" id="ps5s">En attente</div>
+        </div>
       </div>
-      <div id="statusMsg" class="status-box status-loading">
-        <span>⏳</span><span id="statusText">Demarrage...</span>
+      <div id="statusBar" class="status-bar status-loading">
+        <span>⏳</span><span id="statusText">Démarrage…</span>
       </div>
     </div>
   </div>
-  <div class="card hidden" id="resultSection">
-    <div class="card-header"><div class="step-badge">✓</div><h3>Video prete !</h3></div>
-    <div style="text-align:center;padding:20px">
-      <video id="videoPlayer" controls playsinline style="width:100%;border-radius:10px;margin-bottom:16px;max-height:500px"></video>
-      <div class="share-row">
-        <a id="downloadBtn" class="btn btn-primary" download="video_pedagogique.mp4">⬇️ Telecharger</a>
+
+  <!-- ───── RÉSULTAT ───── -->
+  <div class="card fade-in hidden" id="cardResult">
+    <div class="result-inner">
+      <div class="step-hero" style="justify-content:center">
+        <div class="step-num done">✓</div>
+        <div>
+          <div class="step-title">Vidéo prête à publier !</div>
+          <div class="step-sub">Format 9:16 optimisé Reels · TikTok · Shorts</div>
+        </div>
       </div>
-      <p style="font-size:11px;color:#999;margin-top:12px;margin-bottom:16px">
-        Telecharge la video puis uploade-la sur Instagram, TikTok ou YouTube Shorts
-      </p>
-      <div class="share-row">
-        <a class="btn btn-insta" href="https://www.instagram.com/" target="_blank">📸 Instagram</a>
-        <a class="btn btn-tiktok" href="https://www.tiktok.com/upload" target="_blank">🎵 TikTok</a>
-        <a class="btn btn-youtube" href="https://studio.youtube.com/" target="_blank">▶️ YouTube</a>
+
+      <div class="video-wrap">
+        <video id="videoPlayer" controls playsinline></video>
       </div>
-      <br>
-      <button class="btn btn-secondary" id="btnReset">Nouvelle video</button>
+
+      <!-- Miniature YouTube -->
+      <div id="thumbnailSection" class="hidden">
+        <div class="label" style="text-align:left;margin-bottom:8px">🖼️ Miniature YouTube générée</div>
+        <div style="border-radius:var(--radius-sm);overflow:hidden;aspect-ratio:16/9;background:var(--bg)">
+          <img id="thumbnailImg" style="width:100%;height:100%;object-fit:cover" alt="Miniature YouTube">
+        </div>
+      </div>
+
+      <!-- Voix utilisée -->
+      <div id="voiceInfo" class="hidden" style="display:flex;justify-content:center">
+        <div class="voice-badge">🎙️ Voix : <span id="voiceName"></span></div>
+      </div>
+
+      <div class="platforms">
+        <div class="share-hint">
+          ① Télécharge la vidéo &nbsp;→&nbsp; ② Uploade directement sur la plateforme
+        </div>
+        <a id="downloadBtn" class="platform-btn btn-dl" download="metatuteur_video.mp4">
+          <span class="picon">⬇️</span>
+          <span class="pname">Télécharger la vidéo MP4</span>
+          <span class="parrow">↓</span>
+        </a>
+        <a class="platform-btn btn-ig" href="https://www.instagram.com/" target="_blank" rel="noopener">
+          <span class="picon">📸</span>
+          <span class="pname">Publier sur Instagram Reels</span>
+          <span class="parrow">↗</span>
+        </a>
+        <a class="platform-btn btn-tt" href="https://www.tiktok.com/upload" target="_blank" rel="noopener">
+          <span class="picon">🎵</span>
+          <span class="pname">Publier sur TikTok</span>
+          <span class="parrow">↗</span>
+        </a>
+        <a class="platform-btn btn-yt" href="https://studio.youtube.com/" target="_blank" rel="noopener">
+          <span class="picon">▶️</span>
+          <span class="pname">Publier sur YouTube Shorts</span>
+          <span class="parrow">↗</span>
+        </a>
+      </div>
+
+      <button class="btn btn-ghost btn-full" id="btnReset">+ Créer une nouvelle vidéo</button>
     </div>
   </div>
-</div>
+
+</main>
+
 <script>
 var API = 'https://studio-api.metatuteur.workers.dev';
 var niveau = 'CM2';
 var selectedPersona = null;
 var personasData = [];
 var sujet = '';
+var generatedScript = '';
+var thumbnailUrl = '';
+var voiceUsed = '';
 
+// ── UTILS ──
 function showErr(id, msg) {
   var el = document.getElementById(id);
-  el.textContent = msg;
+  el.textContent = '⚠ ' + msg;
   el.classList.remove('hidden');
-  setTimeout(function() { el.classList.add('hidden'); }, 7000);
+  setTimeout(function() { el.classList.add('hidden'); }, 8000);
 }
-function setStep(n, status) {
-  for (var i = 1; i <= 4; i++) {
-    document.getElementById('step' + i).className =
-      'step-row' + (i < n ? ' done' : i === n ? ' active' : '');
-    document.getElementById('s' + i + 'status').textContent =
-      i < n ? '✅ Fait' : i === n ? status : 'En attente';
-  }
-}
-function setStatus(msg, type) {
-  document.getElementById('statusMsg').className = 'status-box status-' + (type || 'loading');
-  document.getElementById('statusText').textContent = msg;
-}
+
 function escapeHtml(str) {
   return String(str || '').replace(/[&<>"']/g, function(c) {
-    return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
   });
 }
-function renderPersonas() {
+
+// ── PRODUCTION STEPS ──
+function setProdStep(n, state, detail) {
+  // state: 'wait' | 'active' | 'done' | 'error'
+  for (var i = 1; i <= 5; i++) {
+    var el = document.getElementById('ps' + i);
+    var sel = document.getElementById('ps' + i + 's');
+    el.className = 'prod-step' + (i < n ? ' done' : i === n ? ' active' : '');
+    if (i < n) {
+      sel.textContent = '✅ Fait';
+    } else if (i === n) {
+      if (state === 'active') {
+        sel.innerHTML = '<div class="spinner"></div><span>En cours</span>';
+      } else if (state === 'error') {
+        sel.textContent = '❌ Erreur';
+      }
+    } else {
+      sel.textContent = 'En attente';
+    }
+  }
+  if (detail && document.getElementById('ps' + n + 'detail')) {
+    document.getElementById('ps' + n + 'detail').textContent = detail;
+  }
+}
+
+function setStatus(msg, type) {
+  var bar = document.getElementById('statusBar');
+  bar.className = 'status-bar status-' + (type || 'loading');
+  var icon = type === 'success' ? '✅' : type === 'error' ? '❌' : '⏳';
+  document.getElementById('statusText').textContent = msg;
+  bar.querySelector('span').textContent = icon;
+  document.getElementById('prodSubtitle').textContent =
+    type === 'success' ? 'Terminé avec succès !' :
+    type === 'error' ? 'Une erreur est survenue' : 'Patience, la magie opère…';
+}
+
+// ── PERSONAS ──
+function renderPersonas(list) {
   var grid = document.getElementById('personaGrid');
   grid.innerHTML = '';
-  personasData.forEach(function(p, i) {
+  list.forEach(function(p, i) {
     var c = document.createElement('div');
     c.className = 'persona-card';
     c.innerHTML =
@@ -171,159 +694,263 @@ function renderPersonas() {
       '<div class="persona-role">' + escapeHtml(p.titre) + '</div>' +
       '<div class="persona-quote">"' + escapeHtml(p.accroche) + '"</div>';
     c.addEventListener('click', function() {
-      document.querySelectorAll('.persona-card').forEach(function(x) {
-        x.classList.remove('selected');
-      });
+      document.querySelectorAll('.persona-card').forEach(function(x) { x.classList.remove('selected'); });
       c.classList.add('selected');
-      selectedPersona = personasData[i];
+      selectedPersona = list[i];
+      // Lancer la génération du script dès la sélection
+      genererScriptPreview();
     });
     grid.appendChild(c);
   });
 }
 
-// ---- Étape 1 : trouver les personnages ----
-async function analyserSujet() {
-  sujet = document.getElementById('sujetInput').value.trim();
-  if (!sujet) { showErr('erreur1', 'Entre un sujet !'); return; }
-  document.getElementById('personasSection').classList.remove('hidden');
-  document.getElementById('personaGrid').innerHTML =
-    '<div style="grid-column:1/-1;padding:12px;color:#666;font-size:13px">⏳ Recherche des personnages...</div>';
-  try {
-    var r = await fetch(API + '/api/claude', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        prompt:
-          'Pour le sujet "' + sujet + '" niveau ' + niveau + ', propose 4 personnages historiques ou scientifiques ' +
-          'expressifs et charismatiques qui pourraient expliquer ce sujet de facon memorable. ' +
-          'Pour chaque personnage indique son genre. ' +
-          'Reponds UNIQUEMENT en JSON valide sans markdown: ' +
-          '{"personnages":[{"emoji":"...","nom":"...","titre":"...","accroche":"...","genre":"homme ou femme"}]}'
-      })
-    });
-    if (!r.ok) throw new Error('Serveur: ' + r.status);
-    var data = await r.json();
-    if (data.error) throw new Error(data.error);
-    var clean = data.text.trim().replace(/```json|```/g, '').trim();
-    var parsed = JSON.parse(clean);
-    personasData = parsed.personnages;
-    renderPersonas();
-  } catch(e) {
-    document.getElementById('personaGrid').innerHTML = '';
-    showErr('erreur2', 'Erreur: ' + e.message);
-  }
-}
-
-// ---- Helper : appel POST JSON ----
+// ── API helpers ──
 async function postJSON(path, payload) {
   var r = await fetch(API + path, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(payload)
   });
   var data = await r.json().catch(function() { return {}; });
-  if (!r.ok || data.error) {
-    throw new Error(data.error || ('Serveur: ' + r.status));
-  }
+  if (!r.ok || data.error) throw new Error(data.error || ('Serveur: ' + r.status));
   return data;
 }
 
-// ---- Étape 3 : génération du script ----
-async function genererScript() {
-  setStep(1, 'En cours...');
-  setStatus('Rédaction du script par ' + selectedPersona.nom + '...');
-  var prompt =
-    'Tu es ' + selectedPersona.nom + ', ' + selectedPersona.titre + '. ' +
-    'Explique "' + sujet + '" pour un élève de niveau ' + niveau + ' ' +
-    'en parlant à la première personne, de façon vivante et mémorable. ' +
-    'Maximum 1400 caractères, sans titres ni markdown, juste le texte parlé.';
-  var data = await postJSON('/api/claude', { prompt: prompt });
-  return data.text.trim();
-}
+// ── ÉTAPE 1 : Analyser le sujet ──
+async function analyserSujet() {
+  sujet = document.getElementById('sujetInput').value.trim();
+  if (!sujet) { showErr('erreur1', 'Saisis un concept à expliquer !'); return; }
 
-// ---- Génération du portrait ----
-async function genererImage() {
-  setStep(2, 'En cours...');
-  setStatus('Génération du portrait de ' + selectedPersona.nom + '...');
-  var prompt = 'Portrait of ' + selectedPersona.nom + ', ' + selectedPersona.titre +
-    ', historical accurate, looking at camera';
-  var data = await postJSON('/api/image', { prompt: prompt });
-  return data.url;
-}
+  document.getElementById('btnAnalyser').disabled = true;
+  document.getElementById('btnAnalyser').innerHTML = '<span>⏳</span> Recherche…';
+  document.getElementById('cardPersonas').classList.remove('hidden');
 
-// ---- Lancement vidéo + polling ----
-async function genererVideo(script, imageUrl) {
-  setStep(3, 'En cours...');
-  setStatus('Lancement de la vidéo HeyGen...');
-  var start = await postJSON('/api/video', {
-    script: script,
-    imageUrl: imageUrl,
-    genre: selectedPersona.genre === 'femme' ? 'femme' : 'homme'
-  });
+  // Skeleton loading
+  var grid = document.getElementById('personaGrid');
+  grid.innerHTML =
+    '<div class="persona-card skeleton" style="height:130px"></div>' +
+    '<div class="persona-card skeleton" style="height:130px"></div>' +
+    '<div class="persona-card skeleton" style="height:130px"></div>' +
+    '<div class="persona-card skeleton" style="height:130px"></div>';
 
-  var jobId = start.job_id;
-  if (!jobId) throw new Error('job_id manquant');
-
-  // Polling toutes les 5s, max 5 minutes
-  for (var i = 0; i < 60; i++) {
-    await new Promise(function(res) { setTimeout(res, 5000); });
-    setStatus('Rendu en cours... (' + (i * 5) + 's)');
-
-    var r = await fetch(API + '/api/video/status?job_id=' + encodeURIComponent(jobId));
-    var poll = await r.json().catch(function() { return {}; });
-
-    if (poll.status === 'completed' && poll.url) {
-      return poll.url;
-    }
-    if (poll.status === 'failed') {
-      throw new Error(poll.error || 'Le rendu vidéo a échoué');
-    }
+  try {
+    var data = await postJSON('/api/claude', {
+      prompt:
+        'Pour le sujet "' + sujet + '" niveau ' + niveau + ', propose 4 personnages historiques ou scientifiques ' +
+        'expressifs et charismatiques qui pourraient expliquer ce sujet de façon mémorable et virale sur TikTok. ' +
+        'Choisis des personnages connus des parents ET des enfants. ' +
+        'Chaque accroche doit être provocante, surprenante ou drôle. ' +
+        'Indique le genre de chaque personnage. ' +
+        'Réponds UNIQUEMENT en JSON valide sans markdown: ' +
+        '{"personnages":[{"emoji":"...","nom":"...","titre":"...","accroche":"...","genre":"homme ou femme"}]}'
+    });
+    var clean = data.text.trim().replace(/```json|```/g, '').trim();
+    var parsed = JSON.parse(clean);
+    personasData = parsed.personnages;
+    renderPersonas(personasData);
+  } catch(e) {
+    grid.innerHTML = '';
+    showErr('erreur2', 'Erreur: ' + e.message);
+  } finally {
+    document.getElementById('btnAnalyser').disabled = false;
+    document.getElementById('btnAnalyser').innerHTML = '<span>Trouver les personnages</span> <span>→</span>';
   }
-  throw new Error('Délai dépassé : vidéo non disponible après 5 minutes');
 }
 
-// ---- Orchestration complète ----
-async function produire() {
-  if (!selectedPersona) { showErr('erreur2', 'Choisis un personnage !'); return; }
+// ── ÉTAPE 2 : Génération script en preview ──
+async function genererScriptPreview() {
+  if (!selectedPersona) return;
 
-  document.getElementById('personaNomStep').textContent = selectedPersona.nom;
-  document.getElementById('productionSection').classList.remove('hidden');
+  // Montrer la carte script
+  document.getElementById('cardScript').classList.remove('hidden');
+  document.getElementById('cardScript').scrollIntoView({behavior:'smooth', block:'nearest'});
+  document.getElementById('scriptPreview').textContent = '✍️ Rédaction du script viral…';
+  document.getElementById('hookPreview').classList.add('hidden');
   document.getElementById('btnProduire').disabled = true;
 
   try {
-    var script = await genererScript();
-    var imageUrl = await genererImage();
-    var videoUrl = await genererVideo(script, imageUrl);
+    var data = await postJSON('/api/script', {
+      sujet: sujet,
+      persona: selectedPersona,
+      niveau: niveau
+    });
+    generatedScript = data.text.trim();
 
-    setStep(5, '');
+    // Extraire le hook si présent
+    var hookMatch = generatedScript.match(/^HOOK\s*:\s*(.+?)(\n|$)/i);
+    if (hookMatch) {
+      var hookText = hookMatch[1].trim();
+      document.getElementById('hookPreview').textContent = hookText;
+      document.getElementById('hookPreview').classList.remove('hidden');
+      // Afficher le reste du script sans la ligne HOOK:
+      var restScript = generatedScript.replace(/^HOOK\s*:.+(\n|$)/i, '').trim();
+      document.getElementById('scriptPreview').textContent = restScript;
+    } else {
+      document.getElementById('scriptPreview').textContent = generatedScript;
+    }
+
+    document.getElementById('btnProduire').disabled = false;
+  } catch(e) {
+    document.getElementById('scriptPreview').textContent = '';
+    showErr('erreur3', 'Erreur script: ' + e.message);
+  }
+}
+
+// ── ÉTAPE 3 : Production complète ──
+async function produire() {
+  if (!selectedPersona) { showErr('erreur2', 'Choisis un personnage !'); return; }
+  if (!generatedScript) { showErr('erreur3', 'Script non prêt, attends quelques secondes.'); return; }
+
+  document.getElementById('cardProd').classList.remove('hidden');
+  document.getElementById('cardProd').scrollIntoView({behavior:'smooth'});
+  document.getElementById('btnProduire').disabled = true;
+
+  try {
+    // STEP 1 — Script (déjà fait, marquer done)
+    setProdStep(1, 'active');
+    setStatus('Script viral validé…');
+    await new Promise(r => setTimeout(r, 600));
+    setProdStep(2, 'active');
+
+    // STEP 2 — Portrait
+    setStatus('Génération du portrait expressif de ' + selectedPersona.nom + '…');
+    var imgPrompt = 'Portrait of ' + selectedPersona.nom + ', ' + selectedPersona.titre +
+      ', historical figure, looking directly at camera with enthusiasm and charisma, teaching pose';
+    var imgData = await postJSON('/api/image', { prompt: imgPrompt, type: 'portrait' });
+    var imageUrl = imgData.url;
+
+    // STEP 3 — Thumbnail YouTube
+    setProdStep(3, 'active');
+    setStatus('Génération de la miniature YouTube…');
+    var thumbPrompt = 'Portrait of ' + selectedPersona.nom + ', ' + selectedPersona.titre +
+      ', shocked or excited face, teaching about "' + sujet + '"';
+    var thumbData = await postJSON('/api/image', { prompt: thumbPrompt, type: 'thumbnail' });
+    thumbnailUrl = thumbData.url;
+
+    // STEP 4 — Lancer HeyGen
+    setProdStep(4, 'active');
+    setStatus('Lancement HeyGen avec meilleure voix FR…');
+    var videoStart = await postJSON('/api/video', {
+      script: generatedScript,
+      imageUrl: imageUrl,
+      genre: selectedPersona.genre === 'femme' ? 'femme' : 'homme'
+    });
+    var jobId = videoStart.job_id;
+    voiceUsed = videoStart.voice_used || '';
+    if (voiceUsed) {
+      document.getElementById('ps4detail').textContent = 'Voix : ' + voiceUsed;
+    }
+
+    // STEP 5 — Polling
+    setProdStep(5, 'active');
+    setStatus('Rendu vidéo 9:16 en cours… (peut prendre 2-4 min)');
+
+    var videoUrl = null;
+    for (var i = 0; i < 72; i++) {
+      await new Promise(r => setTimeout(r, 5000));
+      var elapsed = Math.round((i + 1) * 5);
+      setStatus('Rendu en cours… ' + elapsed + 's écoulées');
+
+      var poll = await fetch(API + '/api/video/status?job_id=' + encodeURIComponent(jobId))
+        .then(r => r.json()).catch(() => ({}));
+
+      if (poll.status === 'completed' && poll.url) {
+        videoUrl = poll.url;
+        break;
+      }
+      if (poll.status === 'failed') {
+        throw new Error(poll.error || 'Le rendu HeyGen a échoué');
+      }
+    }
+    if (!videoUrl) throw new Error('Délai dépassé : vidéo non disponible après 6 minutes');
+
+    // ── SUCCÈS ──
+    setProdStep(6, 'done'); // marque tout done
     setStatus('Vidéo prête !', 'success');
 
+    // Afficher résultat
     var player = document.getElementById('videoPlayer');
     player.src = videoUrl;
     document.getElementById('downloadBtn').href = videoUrl;
-    document.getElementById('resultSection').classList.remove('hidden');
-    document.getElementById('productionSection').classList.add('hidden');
+
+    if (thumbnailUrl) {
+      document.getElementById('thumbnailImg').src = thumbnailUrl;
+      document.getElementById('thumbnailSection').classList.remove('hidden');
+    }
+    if (voiceUsed) {
+      document.getElementById('voiceName').textContent = voiceUsed;
+      document.getElementById('voiceInfo').classList.remove('hidden');
+      document.getElementById('voiceInfo').style.display = 'flex';
+    }
+
+    document.getElementById('cardResult').classList.remove('hidden');
+    document.getElementById('cardResult').scrollIntoView({behavior:'smooth'});
+    document.getElementById('cardProd').classList.add('hidden');
+
+    // Marquer étapes
+    document.getElementById('badge1').textContent = '✓';
+    document.getElementById('badge1').className = 'step-num done';
+    document.getElementById('badge2').textContent = '✓';
+    document.getElementById('badge2').className = 'step-num done';
+    document.getElementById('badge3').textContent = '✓';
+    document.getElementById('badge3').className = 'step-num done';
+
   } catch(e) {
-    setStatus('Erreur: ' + e.message, 'error');
+    setStatus('Erreur : ' + e.message, 'error');
+    showErr('erreur3', e.message);
   } finally {
     document.getElementById('btnProduire').disabled = false;
   }
 }
 
-// ---- Reset ----
-function reset() {
-  selectedPersona = null;
-  personasData = [];
-  document.getElementById('sujetInput').value = '';
-  document.getElementById('personaGrid').innerHTML = '';
-  document.getElementById('personasSection').classList.add('hidden');
-  document.getElementById('productionSection').classList.add('hidden');
-  document.getElementById('resultSection').classList.add('hidden');
-  document.getElementById('videoPlayer').src = '';
-  setStep(1, 'En cours...');
+// Marquer tout done visuellement
+function setProdStep(n, state) {
+  for (var i = 1; i <= 5; i++) {
+    var el = document.getElementById('ps' + i);
+    var sel = document.getElementById('ps' + i + 's');
+    if (n > 5) {
+      // tout done
+      el.className = 'prod-step done';
+      sel.textContent = '✅ Fait';
+    } else {
+      el.className = 'prod-step' + (i < n ? ' done' : i === n ? ' active' : '');
+      if (i < n) {
+        sel.textContent = '✅ Fait';
+      } else if (i === n) {
+        sel.innerHTML = '<span class="spinner"></span><span>En cours…</span>';
+      } else {
+        sel.textContent = 'En attente';
+      }
+    }
+  }
 }
 
-// ---- Événements ----
+// ── RESET ──
+function reset() {
+  selectedPersona = null; personasData = []; sujet = ''; generatedScript = '';
+  thumbnailUrl = ''; voiceUsed = '';
+  document.getElementById('sujetInput').value = '';
+  document.getElementById('personaGrid').innerHTML = '';
+  document.getElementById('scriptPreview').textContent = '';
+  document.getElementById('hookPreview').classList.add('hidden');
+  document.getElementById('cardPersonas').classList.add('hidden');
+  document.getElementById('cardScript').classList.add('hidden');
+  document.getElementById('cardProd').classList.add('hidden');
+  document.getElementById('cardResult').classList.add('hidden');
+  document.getElementById('videoPlayer').src = '';
+  document.getElementById('thumbnailSection').classList.add('hidden');
+  document.getElementById('voiceInfo').classList.add('hidden');
+  document.getElementById('btnProduire').disabled = true;
+  ['badge1','badge2','badge3'].forEach(function(id) {
+    var el = document.getElementById(id);
+    el.className = 'step-num';
+    el.textContent = id.slice(-1);
+  });
+  document.getElementById('badge4').textContent = '4';
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+// ── EVENTS ──
 document.querySelectorAll('.niveau-btn').forEach(function(b) {
   b.addEventListener('click', function() {
     document.querySelectorAll('.niveau-btn').forEach(function(x) { x.classList.remove('selected'); });
@@ -334,6 +961,11 @@ document.querySelectorAll('.niveau-btn').forEach(function(b) {
 document.getElementById('btnAnalyser').addEventListener('click', analyserSujet);
 document.getElementById('btnProduire').addEventListener('click', produire);
 document.getElementById('btnReset').addEventListener('click', reset);
+
+// Enter dans le champ sujet
+document.getElementById('sujetInput').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') analyserSujet();
+});
 </script>
 </body>
 </html>
